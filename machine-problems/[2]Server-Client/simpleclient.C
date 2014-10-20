@@ -19,6 +19,7 @@
 /* INCLUDES */
 /*--------------------------------------------------------------------------*/
 #include <ctime>
+#include <sys/time.h>
 
 #include <cassert>
 #include <string>
@@ -56,6 +57,21 @@ using namespace std;
 /* LOCAL FUNCTIONS -- SUPPORT FUNCTIONS */
 /*--------------------------------------------------------------------------*/
 
+/* from MP1 */
+void print_time_diff(struct timeval * tp1, struct timeval * tp2) {
+  /* Prints to stdout the difference, in seconds and museconds, between two
+     timevals. */
+
+  long sec = tp2->tv_sec - tp1->tv_sec;
+  long musec = tp2->tv_usec - tp1->tv_usec;
+  if (musec < 0) {
+    musec += 1000000;
+    sec--;
+  }
+  printf(" [sec = %ld, musec = %ld] ", sec, musec);
+
+}
+
 string int2string(int number) {
    stringstream ss;//create a stringstream
    ss << number;//add number to the stream
@@ -78,13 +94,12 @@ int main(int argc, char * argv[]) {
   int c;
   bool timer, invocation;
 
-  std::clock_t timeWholeStart;
-  std::clock_t timeHelloStart;
-  std::clock_t timeHelloEnd;
-  std::clock_t timeLocalHelloStart;
-
-  int helloTime;
-  int helloLocalTime;
+  struct timeval timeWholeStart;
+  struct timeval timeWholeEnd;
+  struct timeval timeHelloStart;
+  struct timeval timeHelloEnd;
+  struct timeval timeLocalHelloStart;
+  struct timeval timeLocalHelloEnd;
 
   while ((c = getopt(argc, argv, "hti")) != -1 ) {
     switch(c) {
@@ -111,7 +126,7 @@ int main(int argc, char * argv[]) {
       cout << "CLIENT STARTED:" << endl;
 
       if (timer) {
-        timeWholeStart = std::clock();
+        assert(gettimeofday(&timeWholeStart, 0) == 0);
       }
 
       cout << "Establishing control channel... " << flush;
@@ -121,19 +136,19 @@ int main(int argc, char * argv[]) {
       /* -- Start sending a sequence of requests */
 
       if (timer || invocation)
-        timeHelloStart = std::clock();
+        assert(gettimeofday(&timeHelloStart, 0) == 0);
 
       string reply1 = chan.send_request("hello");
 
       if (timer || invocation)
-        helloTime = std::clock() - timeHelloStart;
+        assert(gettimeofday(&timeHelloEnd, 0) == 0);
 
       cout << "Reply to request 'hello' is '" << reply1 << "'" << endl;
 
       if (invocation) {
-        timeLocalHelloStart = std::clock();
+        assert(gettimeofday(&timeLocalHelloStart, 0) == 0);
         string notUsed = helloReply("hello");
-        helloLocalTime = std::clock() - timeLocalHelloStart;
+        assert(gettimeofday(&timeLocalHelloEnd, 0) == 0);
       }
 
       string reply2 = chan.send_request("data Joe Smith");
@@ -151,17 +166,26 @@ int main(int argc, char * argv[]) {
       string reply4 = chan.send_request("quit");
       cout << "Reply to request 'quit' is '" << reply4 << endl;
 
+
+
       if (timer) {
-        cout << "Time for the whole process was: " << (std::clock()-timeWholeStart) << endl;
+        assert(gettimeofday(&timeWholeEnd, 0) == 0);
+        cout << "Time for the whole process was: ";
+        print_time_diff(&timeWholeStart, &timeWholeEnd);
+        cout << endl;
       }
       if (invocation || timer) {
-        cout << "Time for the hello request was: " << helloTime << endl;
+        cout << "Time for the hello request was: ";
+        print_time_diff(&timeHelloStart, &timeHelloEnd);
+        cout << endl;
       }
       if (invocation) {
-        cout << "Time for the local hello request was " << helloLocalTime << endl;
+        cout << "Time for the local hello request was ";
+        print_time_diff(&timeLocalHelloStart, &timeLocalHelloEnd);
+        cout << endl;
       }
 
-      usleep(1000000);
+      //usleep(1000000);
       return 0;
     }
     else {
