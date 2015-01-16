@@ -1,0 +1,21 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+int main(int argc, char** argv)
+{
+  int start = atoi(argv[1]);
+  int child = fork();
+
+  //setting ups
+  int i;
+  for (i = start; i > 0; i--) {
+    if (child == -1) break;
+    else if (child == 0) { //child process
+      child = fork(); break;
+    }
+  }
+  wait(NULL); 
+  std::cout<<i<<'\n';
+}
+
