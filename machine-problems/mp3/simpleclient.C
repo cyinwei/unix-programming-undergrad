@@ -159,10 +159,8 @@ void* request_routine(void* person) {
   string request = "data " + name;
 
   for (int i=0; i<REQUEST_SIZE; i++) {
-    cout<<"in for loop"<<endl<<flush;
     reply_str = ochan.send_request(request);
     reply = atoi(reply_str.c_str());
-    cout<<"reply is "<<reply<<endl<<flush;
     buffer.produce(nameid, reply);
   }
   ochan.send_request("quit");
@@ -279,7 +277,7 @@ int main(int argc, char * argv[]) {
     cerr<<"Error in simpleclient.C: cannot fork process.  Bye.\n";
     return -1;
   }
-  else if (client_process == 0) {
+  else if (client_process != 0) {
     /* wait for server to start */
     usleep(10000);
     cout << "CLIENT STARTED:" << endl;
@@ -348,7 +346,6 @@ int main(int argc, char * argv[]) {
 
     chan->send_request("quit");
     delete chan;
-    usleep(1000000);
 
     for (i=0; i<RT_ST_SIZE; i++) {
       rc = pthread_join(statistic_threads[i], &status);
@@ -372,7 +369,8 @@ int main(int argc, char * argv[]) {
       }
     }
 
-    pthread_exit(NULL);
+    // pthread_exit(NULL); => only used when I want the other threads to continue
+    return 0;
   }
   else {
     cout << "SERVER STARTED: " << endl;

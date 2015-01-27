@@ -11,7 +11,6 @@ BoundedBuffer::BoundedBuffer(int size) {
 }
 
 void BoundedBuffer::produce(int person, int value) {
-	cout<<"\nIn BoundedBuffer::produce()\n"<<flush;
 	hasSpace.P(); 
 	mutex.P();
 	people.push_back(person);
@@ -21,12 +20,10 @@ void BoundedBuffer::produce(int person, int value) {
 }
 
 std::vector<int> BoundedBuffer::consume() {
-	cout<<"\nIn BoundedBuffer::consume()\n"<<flush;
 	int return_person, return_value;
 	vector<int> return_data (2);
 
 	hasItems.P();
-	cout<<"\nIn BoundedBuffer::consume(), past hasItems lock...\n"<<flush;
 	mutex.P();
 	return_person = people[people.size()-1];
 	return_value = values[values.size()-1];
@@ -39,9 +36,3 @@ std::vector<int> BoundedBuffer::consume() {
 	return_data[1] = return_value;
 	return return_data;
 }
-
-// bool BoundedBuffer::empty() {
-// 	bool empty;
-// 	mutex.P();
-// 	if ()
-// }
