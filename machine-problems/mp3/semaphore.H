@@ -59,8 +59,8 @@ public:
 
   /* -- SEMAPHORE OPERATIONS */
 
-  int P();
-  int V();
+  int P(); /* wait */
+  int V(); /* signal */
 };
 
 
